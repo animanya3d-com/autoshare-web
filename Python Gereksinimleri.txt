@@ -1,0 +1,15 @@
+# AutoShare - Gerekli Python Paketleri
+
+# YouTube video indirme
+yt-dlp>=2026.02.04
+
+# HTTP istekleri (TikTok API için)
+requests>=2.32.0
+
+# Video işleme (FFmpeg Python wrapper - opsiyonel)
+# ffmpeg-python>=0.2.0
+
+# Not: FFmpeg ve FFprobe sistem paketleri gereklidir
+# Ubuntu/Debian: sudo apt-get install ffmpeg
+# macOS: brew install ffmpeg
+# Windows: https://ffmpeg.org/download.html

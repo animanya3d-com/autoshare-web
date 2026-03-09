@@ -1,0 +1,284 @@
+// AutoShare - Frontend Logic with CREAO Backend Integration
+
+// Configuration
+const CONFIG = {
+    // CREAO backend endpoint (kullanıcı kendi CREAO workspace URL'ini girecek)
+    CREAO_ENDPOINT: 'YOUR_CREAO_ENDPOINT_HERE', // Örnek: https://api.creao.com/workspace/xxx/autoshare
+
+    // Demo mode (backend olmadan test için)
+    DEMO_MODE: true, // Production'da false yapın
+};
+
+// State
+const state = {
+    processing: false,
+    currentVideoId: null,
+};
+
+// DOM Elements
+const form = document.getElementById('autoshare-form');
+const submitBtn = document.getElementById('submit-btn');
+const progressSection = document.getElementById('progress-section');
+const resultsSection = document.getElementById('results-section');
+const errorSection = document.getElementById('error-section');
+const tiktokEnabledCheckbox = document.getElementById('tiktok-enabled');
+const tiktokTokenGroup = document.getElementById('tiktok-token-group');
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', init);
+
+function init() {
+    // TikTok checkbox toggle
+    tiktokEnabledCheckbox.addEventListener('change', (e) => {
+        tiktokTokenGroup.style.display = e.target.checked ? 'flex' : 'none';
+    });
+
+    // Form submission
+    form.addEventListener('submit', handleSubmit);
+
+    // Load saved settings from localStorage
+    loadSavedSettings();
+}
+
+function loadSavedSettings() {
+    const savedToken = localStorage.getItem('tiktok_token');
+    if (savedToken) {
+        document.getElementById('tiktok-token').value = savedToken;
+    }
+}
+
+async function handleSubmit(e) {
+    e.preventDefault();
+
+    if (state.processing) return;
+
+    // Get form data
+    const formData = {
+        youtubeUrl: document.getElementById('youtube-url').value.trim(),
+        videoTitle: document.getElementById('video-title').value.trim(),
+        videoDescription: document.getElementById('video-description').value.trim(),
+        instagramEnabled: document.getElementById('instagram-enabled').checked,
+        tiktokEnabled: document.getElementById('tiktok-enabled').checked,
+        tiktokToken: document.getElementById('tiktok-token').value.trim(),
+    };
+
+    // Validation
+    if (!formData.youtubeUrl) {
+        showError('Lütfen geçerli bir YouTube URL\'i girin.');
+        return;
+    }
+
+    if (!formData.instagramEnabled && !formData.tiktokEnabled) {
+        showError('En az bir platform seçin (Instagram veya TikTok).');
+        return;
+    }
+
+    if (formData.tiktokEnabled && !formData.tiktokToken) {
+        showError('TikTok için access token gereklidir.');
+        return;
+    }
+
+    // Save token to localStorage
+    if (formData.tiktokToken) {
+        localStorage.setItem('tiktok_token', formData.tiktokToken);
+    }
+
+    // Start processing
+    await processVideo(formData);
+}
+
+async function processVideo(formData) {
+    state.processing = true;
+    submitBtn.disabled = true;
+
+    // Hide previous sections
+    resultsSection.style.display = 'none';
+    errorSection.style.display = 'none';
+
+    // Show progress
+    progressSection.style.display = 'block';
+    updateProgress(0, 'Video işleme başlatılıyor...');
+
+    try {
+        if (CONFIG.DEMO_MODE) {
+            // Demo mode - simulate processing
+            await simulateProcessing(formData);
+        } else {
+            // Real CREAO backend processing
+            await processWithCreao(formData);
+        }
+    } catch (error) {
+        console.error('Processing error:', error);
+        showError(error.message || 'Bir hata oluştu. Lütfen tekrar deneyin.');
+    } finally {
+        state.processing = false;
+        submitBtn.disabled = false;
+        progressSection.style.display = 'none';
+    }
+}
+
+async function simulateProcessing(formData) {
+    // Simulate YouTube download
+    updateProgress(25, 'YouTube\'dan video indiriliyor...');
+    await sleep(2000);
+
+    // Simulate format conversion
+    updateProgress(50, 'Video dikey formata dönüştürülüyor (9:16)...');
+    await sleep(2000);
+
+    // Simulate Instagram preparation
+    if (formData.instagramEnabled) {
+        updateProgress(75, 'Instagram Reels videosu hazırlanıyor...');
+        await sleep(1500);
+    }
+
+    // Simulate TikTok upload
+    if (formData.tiktokEnabled) {
+        updateProgress(90, 'TikTok\'a video yükleniyor...');
+        await sleep(2000);
+    }
+
+    updateProgress(100, 'Tamamlandı!');
+    await sleep(500);
+
+    // Show results
+    showResults({
+        instagram: formData.instagramEnabled ? {
+            success: true,
+            downloadUrl: 'https://example.com/demo-video.mp4',
+            fileSize: '15.2 MB',
+            resolution: '1080x1920',
+        } : null,
+        tiktok: formData.tiktokEnabled ? {
+            success: true,
+            publishId: 'demo-12345',
+            status: 'Video başarıyla yüklendi! (Private mode)',
+        } : null,
+    });
+}
+
+async function processWithCreao(formData) {
+    // Step 1: Initialize CREAO workflow
+    updateProgress(10, 'CREAO workflow başlatılıyor...');
+
+    const response = await fetch(CONFIG.CREAO_ENDPOINT, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'process_video',
+            data: formData,
+        }),
+    });
+
+    if (!response.ok) {
+        throw new Error('CREAO backend bağlantı hatası');
+    }
+
+    const result = await response.json();
+
+    if (result.error) {
+        throw new Error(result.error);
+    }
+
+    // Step 2: Poll for progress
+    const workflowId = result.workflow_id;
+    let progress = 10;
+
+    while (progress < 100) {
+        await sleep(2000);
+
+        const statusResponse = await fetch(`${CONFIG.CREAO_ENDPOINT}/status/${workflowId}`);
+        const status = await statusResponse.json();
+
+        progress = status.progress || progress;
+        updateProgress(progress, status.message || 'İşleniyor...');
+
+        if (status.status === 'completed') {
+            progress = 100;
+            showResults(status.results);
+            break;
+        }
+
+        if (status.status === 'failed') {
+            throw new Error(status.error || 'İşlem başarısız oldu');
+        }
+    }
+}
+
+function updateProgress(percent, message) {
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+
+    progressFill.style.width = `${percent}%`;
+    progressText.textContent = message;
+}
+
+function showResults(results) {
+    progressSection.style.display = 'none';
+    resultsSection.style.display = 'block';
+
+    // Instagram result
+    const instagramResult = document.getElementById('instagram-result');
+    if (results.instagram && results.instagram.success) {
+        instagramResult.style.display = 'flex';
+        const downloadBtn = document.getElementById('instagram-download');
+        downloadBtn.href = results.instagram.downloadUrl;
+        downloadBtn.download = 'instagram_reels.mp4';
+    } else {
+        instagramResult.style.display = 'none';
+    }
+
+    // TikTok result
+    const tiktokResult = document.getElementById('tiktok-result');
+    if (results.tiktok && results.tiktok.success) {
+        tiktokResult.style.display = 'flex';
+        document.getElementById('tiktok-status').textContent = results.tiktok.status;
+    } else {
+        tiktokResult.style.display = 'none';
+    }
+
+    // Scroll to results
+    resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function showError(message) {
+    progressSection.style.display = 'none';
+    resultsSection.style.display = 'none';
+    errorSection.style.display = 'block';
+
+    document.getElementById('error-message').textContent = message;
+
+    // Scroll to error
+    errorSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Utility: Extract YouTube Video ID
+function extractYoutubeId(url) {
+    const patterns = [
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/,
+        /youtube\.com\/embed\/([^&\s]+)/,
+        /youtube\.com\/v\/([^&\s]+)/,
+    ];
+
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match) return match[1];
+    }
+
+    return null;
+}
+
+// Export for debugging
+window.AutoShare = {
+    state,
+    CONFIG,
+    processVideo,
+    showResults,
+    showError,
+};

@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "name": "autoshare",
+  "builds": [
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/autoshare",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/autoshare/(.*)",
+      "dest": "/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/autoshare",
+      "destination": "/index.html"
+    }
+  ]
+}

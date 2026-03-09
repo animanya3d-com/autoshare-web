@@ -1,0 +1,19 @@
+{
+  "name": "autoshare-web",
+  "version": "1.0.0",
+  "description": "AutoShare - YouTube to Instagram & TikTok Automation",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "build": "echo 'Static site - no build required'"
+  },
+  "keywords": [
+    "youtube",
+    "instagram",
+    "tiktok",
+    "video",
+    "automation"
+  ],
+  "author": "Animanya3D",
+  "license": "MIT"
+}

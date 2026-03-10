@@ -1,284 +1,184 @@
-// AutoShare - Frontend Logic with CREAO Backend Integration
+// AutoShare - YouTube to Instagram & TikTok
+// Configuration and API Integration
 
-// Configuration
 const CONFIG = {
-    // CREAO backend endpoint (kullanıcı kendi CREAO workspace URL'ini girecek)
-    CREAO_ENDPOINT: 'YOUR_CREAO_ENDPOINT_HERE', // Örnek: https://api.creao.com/workspace/xxx/autoshare
-
-    // Demo mode (backend olmadan test için)
-    DEMO_MODE: true, // Production'da false yapın
+    CREAO_ENDPOINT: 'https://api.creao.ai/v1/miniapp/wdJ9GXUpU4/run',
+    DEMO_MODE: false,
 };
 
-// State
-const state = {
-    processing: false,
-    currentVideoId: null,
-};
+// Form Elements
+const form = document.getElementById('autoshareForm');
+const submitBtn = document.getElementById('submitBtn');
+const resultsSection = document.getElementById('results');
+const errorSection = document.getElementById('error');
+const loadingSection = document.getElementById('loading');
 
-// DOM Elements
-const form = document.getElementById('autoshare-form');
-const submitBtn = document.getElementById('submit-btn');
-const progressSection = document.getElementById('progress-section');
-const resultsSection = document.getElementById('results-section');
-const errorSection = document.getElementById('error-section');
-const tiktokEnabledCheckbox = document.getElementById('tiktok-enabled');
-const tiktokTokenGroup = document.getElementById('tiktok-token-group');
-
-// Event Listeners
-document.addEventListener('DOMContentLoaded', init);
-
-function init() {
-    // TikTok checkbox toggle
-    tiktokEnabledCheckbox.addEventListener('change', (e) => {
-        tiktokTokenGroup.style.display = e.target.checked ? 'flex' : 'none';
-    });
-
-    // Form submission
-    form.addEventListener('submit', handleSubmit);
-
-    // Load saved settings from localStorage
-    loadSavedSettings();
-}
-
-function loadSavedSettings() {
-    const savedToken = localStorage.getItem('tiktok_token');
-    if (savedToken) {
-        document.getElementById('tiktok-token').value = savedToken;
-    }
-}
-
-async function handleSubmit(e) {
+// Form Submit Handler
+form.addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    if (state.processing) return;
-
-    // Get form data
-    const formData = {
-        youtubeUrl: document.getElementById('youtube-url').value.trim(),
-        videoTitle: document.getElementById('video-title').value.trim(),
-        videoDescription: document.getElementById('video-description').value.trim(),
-        instagramEnabled: document.getElementById('instagram-enabled').checked,
-        tiktokEnabled: document.getElementById('tiktok-enabled').checked,
-        tiktokToken: document.getElementById('tiktok-token').value.trim(),
-    };
-
-    // Validation
-    if (!formData.youtubeUrl) {
-        showError('Lütfen geçerli bir YouTube URL\'i girin.');
-        return;
-    }
-
-    if (!formData.instagramEnabled && !formData.tiktokEnabled) {
-        showError('En az bir platform seçin (Instagram veya TikTok).');
-        return;
-    }
-
-    if (formData.tiktokEnabled && !formData.tiktokToken) {
-        showError('TikTok için access token gereklidir.');
-        return;
-    }
-
-    // Save token to localStorage
-    if (formData.tiktokToken) {
-        localStorage.setItem('tiktok_token', formData.tiktokToken);
-    }
-
-    // Start processing
-    await processVideo(formData);
-}
-
-async function processVideo(formData) {
-    state.processing = true;
+    
+    // Hide previous results/errors
+    resultsSection.classList.add('hidden');
+    errorSection.classList.add('hidden');
+    loadingSection.classList.remove('hidden');
     submitBtn.disabled = true;
 
-    // Hide previous sections
-    resultsSection.style.display = 'none';
-    errorSection.style.display = 'none';
-
-    // Show progress
-    progressSection.style.display = 'block';
-    updateProgress(0, 'Video işleme başlatılıyor...');
+    // Collect form data
+    const formData = {
+        youtube_url: document.getElementById('youtubeUrl').value,
+        video_title: document.getElementById('videoTitle').value,
+        video_description: document.getElementById('videoDescription').value,
+        prepare_instagram_reels: document.getElementById('prepareInstagram').checked,
+        upload_to_tiktok: document.getElementById('uploadTiktok').checked,
+        tiktok_access_token: document.getElementById('tiktokToken').value || undefined
+    };
 
     try {
         if (CONFIG.DEMO_MODE) {
-            // Demo mode - simulate processing
-            await simulateProcessing(formData);
+            // Demo mode - show sample response
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            showDemoResults(formData);
         } else {
-            // Real CREAO backend processing
-            await processWithCreao(formData);
+            // Real API call
+            const response = await fetch(CONFIG.CREAO_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status} ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            showResults(result);
         }
     } catch (error) {
-        console.error('Processing error:', error);
-        showError(error.message || 'Bir hata oluştu. Lütfen tekrar deneyin.');
+        showError(error.message);
     } finally {
-        state.processing = false;
+        loadingSection.classList.add('hidden');
         submitBtn.disabled = false;
-        progressSection.style.display = 'none';
     }
+});
+
+// Show Results
+function showResults(data) {
+    const resultsContent = document.getElementById('resultsContent');
+    
+    let html = '<div class="space-y-4">';
+    
+    // Instagram Reels Section
+    if (data.instagram_reels && data.instagram_reels.status === 'ready') {
+        html += `
+            <div class="result-card">
+                <h3 class="text-lg font-semibold text-green-600 mb-2">
+                    ✅ Instagram Reels Hazır
+                </h3>
+                <p class="text-sm text-gray-600 mb-3">${data.instagram_reels.note || ''}</p>
+                <a href="${data.instagram_reels.download_url}" 
+                   target="_blank"
+                   class="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-lg hover:from-purple-600 hover:to-pink-600 transition">
+                    📥 Videoyu İndir (${data.instagram_reels.file_size_mb} MB)
+                </a>
+                <div class="mt-3 text-sm text-gray-600">
+                    <p><strong>Çözünürlük:</strong> ${data.instagram_reels.resolution}</p>
+                    <p><strong>Süre:</strong> ${data.instagram_reels.duration_seconds} saniye</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    // TikTok Section
+    if (data.tiktok) {
+        if (data.tiktok.status === 'uploaded') {
+            html += `
+                <div class="result-card">
+                    <h3 class="text-lg font-semibold text-green-600 mb-2">
+                        ✅ TikTok'a Yüklendi
+                    </h3>
+                    <p class="text-sm text-gray-600">
+                        Video ID: ${data.tiktok.publish_id}
+                    </p>
+                    <p class="text-xs text-yellow-600 mt-2">
+                        ⚠️ Video uygulamanız onaylanana kadar gizli olabilir
+                    </p>
+                </div>
+            `;
+        } else if (data.tiktok.status === 'skipped') {
+            html += `
+                <div class="result-card bg-gray-50">
+                    <h3 class="text-lg font-semibold text-gray-600 mb-2">
+                        ⏭️ TikTok Atlandı
+                    </h3>
+                    <p class="text-sm text-gray-600">${data.tiktok.reason}</p>
+                </div>
+            `;
+        }
+    }
+    
+    // Summary
+    if (data.summary && data.summary.operations_completed) {
+        html += `
+            <div class="result-card bg-blue-50">
+                <h3 class="text-lg font-semibold text-blue-600 mb-2">
+                    📊 Özet
+                </h3>
+                <ul class="text-sm text-gray-700 space-y-1">
+                    ${data.summary.operations_completed.map(op => `<li>${op}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    html += '</div>';
+    
+    resultsContent.innerHTML = html;
+    resultsSection.classList.remove('hidden');
 }
 
-async function simulateProcessing(formData) {
-    // Simulate YouTube download
-    updateProgress(25, 'YouTube\'dan video indiriliyor...');
-    await sleep(2000);
-
-    // Simulate format conversion
-    updateProgress(50, 'Video dikey formata dönüştürülüyor (9:16)...');
-    await sleep(2000);
-
-    // Simulate Instagram preparation
-    if (formData.instagramEnabled) {
-        updateProgress(75, 'Instagram Reels videosu hazırlanıyor...');
-        await sleep(1500);
-    }
-
-    // Simulate TikTok upload
-    if (formData.tiktokEnabled) {
-        updateProgress(90, 'TikTok\'a video yükleniyor...');
-        await sleep(2000);
-    }
-
-    updateProgress(100, 'Tamamlandı!');
-    await sleep(500);
-
-    // Show results
-    showResults({
-        instagram: formData.instagramEnabled ? {
-            success: true,
-            downloadUrl: 'https://example.com/demo-video.mp4',
-            fileSize: '15.2 MB',
+// Show Demo Results
+function showDemoResults(formData) {
+    const demoData = {
+        instagram_reels: {
+            status: 'ready',
+            download_url: '#',
+            file_size_mb: 10.5,
             resolution: '1080x1920',
-        } : null,
-        tiktok: formData.tiktokEnabled ? {
-            success: true,
-            publishId: 'demo-12345',
-            status: 'Video başarıyla yüklendi! (Private mode)',
-        } : null,
-    });
-}
-
-async function processWithCreao(formData) {
-    // Step 1: Initialize CREAO workflow
-    updateProgress(10, 'CREAO workflow başlatılıyor...');
-
-    const response = await fetch(CONFIG.CREAO_ENDPOINT, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
+            duration_seconds: 60,
+            note: '✨ DEMO MOD: Gerçek API bağlantısı için app.js dosyasını güncelleyin'
         },
-        body: JSON.stringify({
-            action: 'process_video',
-            data: formData,
-        }),
-    });
-
-    if (!response.ok) {
-        throw new Error('CREAO backend bağlantı hatası');
-    }
-
-    const result = await response.json();
-
-    if (result.error) {
-        throw new Error(result.error);
-    }
-
-    // Step 2: Poll for progress
-    const workflowId = result.workflow_id;
-    let progress = 10;
-
-    while (progress < 100) {
-        await sleep(2000);
-
-        const statusResponse = await fetch(`${CONFIG.CREAO_ENDPOINT}/status/${workflowId}`);
-        const status = await statusResponse.json();
-
-        progress = status.progress || progress;
-        updateProgress(progress, status.message || 'İşleniyor...');
-
-        if (status.status === 'completed') {
-            progress = 100;
-            showResults(status.results);
-            break;
+        tiktok: {
+            status: formData.upload_to_tiktok ? 'uploaded' : 'skipped',
+            reason: formData.upload_to_tiktok ? null : 'Kullanıcı tarafından devre dışı bırakıldı',
+            publish_id: formData.upload_to_tiktok ? 'demo_12345' : null
+        },
+        summary: {
+            operations_completed: [
+                '✅ Demo video oluşturuldu',
+                '✅ Instagram Reels formatı hazır',
+                formData.upload_to_tiktok ? '✅ TikTok\'a yükleme simülasyonu' : '⏭️ TikTok atlandı'
+            ]
         }
-
-        if (status.status === 'failed') {
-            throw new Error(status.error || 'İşlem başarısız oldu');
-        }
-    }
+    };
+    
+    showResults(demoData);
 }
 
-function updateProgress(percent, message) {
-    const progressFill = document.getElementById('progress-fill');
-    const progressText = document.getElementById('progress-text');
-
-    progressFill.style.width = `${percent}%`;
-    progressText.textContent = message;
-}
-
-function showResults(results) {
-    progressSection.style.display = 'none';
-    resultsSection.style.display = 'block';
-
-    // Instagram result
-    const instagramResult = document.getElementById('instagram-result');
-    if (results.instagram && results.instagram.success) {
-        instagramResult.style.display = 'flex';
-        const downloadBtn = document.getElementById('instagram-download');
-        downloadBtn.href = results.instagram.downloadUrl;
-        downloadBtn.download = 'instagram_reels.mp4';
-    } else {
-        instagramResult.style.display = 'none';
-    }
-
-    // TikTok result
-    const tiktokResult = document.getElementById('tiktok-result');
-    if (results.tiktok && results.tiktok.success) {
-        tiktokResult.style.display = 'flex';
-        document.getElementById('tiktok-status').textContent = results.tiktok.status;
-    } else {
-        tiktokResult.style.display = 'none';
-    }
-
-    // Scroll to results
-    resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
+// Show Error
 function showError(message) {
-    progressSection.style.display = 'none';
-    resultsSection.style.display = 'none';
-    errorSection.style.display = 'block';
-
-    document.getElementById('error-message').textContent = message;
-
-    // Scroll to error
-    errorSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const errorContent = document.getElementById('errorContent');
+    errorContent.textContent = message;
+    errorSection.classList.remove('hidden');
 }
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// Utility: Extract YouTube Video ID
-function extractYoutubeId(url) {
-    const patterns = [
-        /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/,
-        /youtube\.com\/embed\/([^&\s]+)/,
-        /youtube\.com\/v\/([^&\s]+)/,
-    ];
-
-    for (const pattern of patterns) {
-        const match = url.match(pattern);
-        if (match) return match[1];
+// Toggle TikTok Token Field
+document.getElementById('uploadTiktok').addEventListener('change', (e) => {
+    const tokenField = document.getElementById('tiktokTokenField');
+    if (e.target.checked) {
+        tokenField.classList.remove('hidden');
+    } else {
+        tokenField.classList.add('hidden');
     }
-
-    return null;
-}
-
-// Export for debugging
-window.AutoShare = {
-    state,
-    CONFIG,
-    processVideo,
-    showResults,
-    showError,
-};
+});

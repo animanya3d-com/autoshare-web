@@ -1,195 +1,195 @@
 <!DOCTYPE html>
-<!-- saved from url=(0165)https://dede3phc22dgx.cloudfront.net/creao2/523876ee-1f49-4791-87ec-d41e3b76aa3b/28715340-8021-7025-c3a4-6f7ac6242e5c/08246990-9cff-49ed-ac06-6e25a44f3298/index.html -->
-<html lang="tr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoShare - YouTube'dan Instagram &amp; TikTok'a</title>
-    <link rel="stylesheet" href="./styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com/">
-    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
-    <link href="./css2" rel="stylesheet">
+    <title>AutoShare - YouTube Video İşleyici</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .result-content {
+            color: #333;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .error {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: #fee;
+            border-left: 4px solid #f44;
+            border-radius: 8px;
+            color: #c33;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="logo">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="32" height="32" rx="8" fill="url(#gradient)"></rect>
-                    <path d="M16 8L20 12H18V20H14V12H12L16 8Z" fill="white"></path>
-                    <path d="M10 22H22V24H10V22Z" fill="white"></path>
-                    <defs>
-                        <lineargradient id="gradient" x1="0" y1="0" x2="32" y2="32">
-                            <stop stop-color="#FF6B6B"></stop>
-                            <stop offset="1" stop-color="#4ECDC4"></stop>
-                        </lineargradient>
-                    </defs>
-                </svg>
-                <h1>AutoShare</h1>
-            </div>
-            <p class="tagline">YouTube'dan Instagram &amp; TikTok'a otomatik paylaşım</p>
-        </header>
-
-        <!-- Main Form -->
-        <main class="main-content">
-            <div class="card">
-                <h2>YouTube Videonuzu Paylaşın</h2>
-                <p class="description">YouTube linkinizi yapıştırın, otomatik olarak Instagram Reels ve TikTok formatına dönüştürülsün.</p>
-
-                <form id="autoshare-form" class="form">
-                    <!-- YouTube URL -->
-                    <div class="form-group">
-                        <label for="youtube-url">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M10 0C4.477 0 0 4.477 0 10s4.477 10 10 10 10-4.477 10-10S15.523 0 10 0zm3.5 10.5l-5 3a.5.5 0 01-.75-.433v-6a.5.5 0 01.75-.433l5 3a.5.5 0 010 .866z"></path>
-                            </svg>
-                            YouTube Video URL
-                        </label>
-                        <input type="url" id="youtube-url" name="youtube-url" placeholder="https://www.youtube.com/watch?v=xxxxx" required="">
-                    </div>
-
-                    <!-- Video Title -->
-                    <div class="form-group">
-                        <label for="video-title">
-                            Video Başlığı
-                        </label>
-                        <input type="text" id="video-title" name="video-title" placeholder="Harika Video!" required="">
-                    </div>
-
-                    <!-- Video Description -->
-                    <div class="form-group">
-                        <label for="video-description">
-                            Video Açıklaması (Opsiyonel)
-                        </label>
-                        <textarea id="video-description" name="video-description" placeholder="#fyp #viral #trending" rows="3"></textarea>
-                    </div>
-
-                    <!-- Platform Selection -->
-                    <div class="form-group">
-                        <label>Hedef Platformlar</label>
-                        <div class="checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="instagram-enabled" checked="">
-                                <span class="checkbox-custom"></span>
-                                <span class="platform-name">
-                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M10 0C7.284 0 6.944.012 5.878.06 2.246.227.227 2.246.06 5.878.012 6.944 0 7.284 0 10s.012 3.056.06 4.122c.167 3.632 2.186 5.651 5.818 5.818C6.944 19.988 7.284 20 10 20s3.056-.012 4.122-.06c3.63-.167 5.652-2.186 5.818-5.818.048-1.066.06-1.406.06-4.122s-.012-3.056-.06-4.122C19.773 2.246 17.754.227 14.122.06 13.056.012 12.716 0 10 0zm0 1.802c2.67 0 2.987.01 4.041.059 2.71.123 3.975 1.409 4.098 4.098.048 1.054.058 1.37.058 4.041 0 2.67-.01 2.986-.058 4.04-.124 2.687-1.387 3.975-4.098 4.099-1.054.048-1.37.058-4.041.058-2.67 0-2.987-.01-4.04-.058-2.717-.124-3.975-1.416-4.099-4.098-.048-1.055-.058-1.37-.058-4.041 0-2.67.01-2.986.058-4.04.124-2.69 1.387-3.976 4.099-4.099 1.054-.048 1.37-.058 4.04-.058zM10 4.865a5.135 5.135 0 100 10.27 5.135 5.135 0 000-10.27zm0 8.468a3.333 3.333 0 110-6.666 3.333 3.333 0 010 6.666zm5.338-8.67a1.2 1.2 0 11-2.4 0 1.2 1.2 0 012.4 0z"></path>
-                                    </svg>
-                                    Instagram Reels
-                                </span>
-                            </label>
-
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="tiktok-enabled">
-                                <span class="checkbox-custom"></span>
-                                <span class="platform-name">
-                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M14.5 0h-3v13.5a3.5 3.5 0 11-3.163-3.48V6.86A6.66 6.66 0 105 13.5 6.5 6.5 0 006.34 9.63V6.5a9.64 9.64 0 108.16 9V6.83A8.5 8.5 0 0020 9V5.83a5.33 5.33 0 01-5.5-5.83z"></path>
-                                    </svg>
-                                    TikTok
-                                </span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- TikTok Token (conditional) -->
-                    <div class="form-group" id="tiktok-token-group" style="display: none;">
-                        <label for="tiktok-token">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2V7a5 5 0 00-5-5zm0 2a3 3 0 013 3v2H7V7a3 3 0 013-3z"></path>
-                            </svg>
-                            TikTok Access Token
-                        </label>
-                        <input type="text" id="tiktok-token" name="tiktok-token" placeholder="eyJhbGciOiJIUzI1Ni...">
-                        <small class="help-text">
-                            TikTok'a otomatik yükleme için <a href="https://developers.tiktok.com/" target="_blank">TikTok Developer</a> hesabından token alın.
-                        </small>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button type="submit" class="btn-primary" id="submit-btn">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"></path>
-                        </svg>
-                        Videoyu İşle
-                    </button>
-                </form>
+        <h1>🎥 AutoShare</h1>
+        <p class="subtitle">YouTube videolarınızı analiz edin ve işleyin</p>
+        
+        <form id="videoForm">
+            <div class="form-group">
+                <label for="videoUrl">YouTube Video URL'si:</label>
+                <input 
+                    type="text" 
+                    id="videoUrl" 
+                    name="videoUrl" 
+                    placeholder="https://www.youtube.com/watch?v=..." 
+                    required
+                >
             </div>
 
-            <!-- Progress Section -->
-            <div class="progress-card" id="progress-section" style="display: none;">
-                <h3>İşlem Durumu</h3>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
-                </div>
-                <p class="progress-text" id="progress-text">Video işleniyor...</p>
+            <div class="form-group">
+                <label for="outputFormat">Çıktı Formatı:</label>
+                <select id="outputFormat" name="outputFormat" required>
+                    <option value="">Format Seçin</option>
+                    <option value="summary">Özet</option>
+                    <option value="transcript">Transkript</option>
+                    <option value="highlights">Öne Çıkanlar</option>
+                    <option value="full">Tam Analiz</option>
+                </select>
             </div>
 
-            <!-- Results Section -->
-            <div class="results-card" id="results-section" style="display: none;">
-                <h3>Tamamlandı! 🎉</h3>
-                <div class="results-grid">
-                    <div class="result-item" id="instagram-result" style="display: none;">
-                        <div class="result-icon instagram">
-                            <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M10 0C7.284 0 6.944.012 5.878.06 2.246.227.227 2.246.06 5.878.012 6.944 0 7.284 0 10s.012 3.056.06 4.122c.167 3.632 2.186 5.651 5.818 5.818C6.944 19.988 7.284 20 10 20s3.056-.012 4.122-.06c3.63-.167 5.652-2.186 5.818-5.818.048-1.066.06-1.406.06-4.122s-.012-3.056-.06-4.122C19.773 2.246 17.754.227 14.122.06 13.056.012 12.716 0 10 0zm0 1.802c2.67 0 2.987.01 4.041.059 2.71.123 3.975 1.409 4.098 4.098.048 1.054.058 1.37.058 4.041 0 2.67-.01 2.986-.058 4.04-.124 2.687-1.387 3.975-4.098 4.099-1.054.048-1.37.058-4.041.058-2.67 0-2.987-.01-4.04-.058-2.717-.124-3.975-1.416-4.099-4.098-.048-1.055-.058-1.37-.058-4.041 0-2.67.01-2.986.058-4.04.124-2.69 1.387-3.976 4.099-4.099 1.054-.048 1.37-.058 4.04-.058z"></path>
-                            </svg>
-                        </div>
-                        <div class="result-content">
-                            <h4>Instagram Reels</h4>
-                            <p>Video hazır! (Manuel yükleme gerekli)</p>
-                            <a href="https://dede3phc22dgx.cloudfront.net/creao2/523876ee-1f49-4791-87ec-d41e3b76aa3b/28715340-8021-7025-c3a4-6f7ac6242e5c/08246990-9cff-49ed-ac06-6e25a44f3298/index.html#" class="btn-download" id="instagram-download">
-                                <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M10 12a1 1 0 01-.707-.293l-4-4a1 1 0 011.414-1.414L9 8.586V3a1 1 0 112 0v5.586l2.293-2.293a1 1 0 011.414 1.414l-4 4A1 1 0 0110 12z"></path>
-                                    <path d="M3 16a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"></path>
-                                </svg>
-                                Videoyu İndir
-                            </a>
-                        </div>
-                    </div>
+            <button type="submit" id="submitBtn">🚀 Videoyu İşle</button>
+        </form>
 
-                    <div class="result-item" id="tiktok-result" style="display: none;">
-                        <div class="result-icon tiktok">
-                            <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M14.5 0h-3v13.5a3.5 3.5 0 11-3.163-3.48V6.86A6.66 6.66 0 105 13.5 6.5 6.5 0 006.34 9.63V6.5a9.64 9.64 0 108.16 9V6.83A8.5 8.5 0 0020 9V5.83a5.33 5.33 0 01-5.5-5.83z"></path>
-                            </svg>
-                        </div>
-                        <div class="result-content">
-                            <h4>TikTok</h4>
-                            <p id="tiktok-status">Video başarıyla yüklendi!</p>
-                            <small class="warning-text">⚠️ Video 'private' modunda. TikTok'ta public yapabilirsiniz.</small>
-                        </div>
-                    </div>
-                </div>
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px; color: #667eea;">İşleniyor, lütfen bekleyin...</p>
+        </div>
 
-                <button class="btn-secondary" onclick="location.reload()">
-                    Yeni Video İşle
-                </button>
-            </div>
-
-            <!-- Error Section -->
-            <div class="error-card" id="error-section" style="display: none;">
-                <svg width="48" height="48" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                </svg>
-                <h3>Bir Hata Oluştu</h3>
-                <p id="error-message"></p>
-                <button class="btn-secondary" onclick="location.reload()">Tekrar Dene</button>
-            </div>
-        </main>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <p>© 2026 AutoShare • Güvenli ve Hızlı Video Paylaşımı</p>
-            <p class="footer-links">
-                <a href="https://developers.tiktok.com/" target="_blank">TikTok API</a> •
-                <a href="https://github.com/yt-dlp/yt-dlp" target="_blank">yt-dlp</a> •
-                <a href="mailto:support@animanya3d.com">Destek</a>
-            </p>
-        </footer>
+        <div class="error" id="error"></div>
+        
+        <div class="result" id="result">
+            <h3>✅ Sonuç:</h3>
+            <div class="result-content" id="resultContent"></div>
+        </div>
     </div>
 
-    <script src="./app.js.indir"></script>
-
-
-</body></html>
+    <script src="app.js"></script>
+</body>
+</html>

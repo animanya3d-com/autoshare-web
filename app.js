@@ -1,6 +1,10 @@
-// API Configuration
-const API_ENDPOINT = 'https://api.creao.ai/v1/miniapp/wdJ9GXUpU4/run?key=YOUR_API_KEY';
-const DEMO_MODE = false;
+// AutoShare - YouTube to Instagram & TikTok
+// Configuration and API Integration
+
+const CONFIG = {
+    CREAO_ENDPOINT: 'https://api.creao.ai/v1/miniapp/wdJ9GXUpU4/run',
+    DEMO_MODE: false,
+};
 
 // Form elements
 const form = document.getElementById('videoForm');

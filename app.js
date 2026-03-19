@@ -116,7 +116,6 @@ errorDiv.style.display = 'block';
 
 // Helper function to show result
 function showResult(content) {
-resultContent.textContent = content;
-resultDiv.style.display = 'block';
+    resultContent.textContent = content;
+    resultDiv.style.display = 'block';
 }
-

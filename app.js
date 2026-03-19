@@ -97,13 +97,15 @@ console.error('API Error:', error);
 });
 
 // Helper function to validate YouTube URL
+// Helper function to validate YouTube URL
 function isValidYouTubeUrl(url) {
-const patterns = [
-/^(https?://)?(www.)?youtube.com/watch?v=[\w-]+/,
-/^(https?://)?(www.)?youtu.be/[\w-]+/,
-/^(https?://)?(www.)?youtube.com/embed/[\w-]+/
-];
-return patterns.some(pattern => pattern.test(url));
+    const patterns = [
+        /^(https?:\/\/)?(www\.)?youtube\.com\/watch\?v=[\w-]+/,
+        /^(https?:\/\/)?(www\.)?youtu\.be\/[\w-]+/,
+        /^(https?:\/\/)?(www\.)?youtube\.com\/embed\/[\w-]+/
+    ];
+    return patterns.some(pattern => pattern.test(url));
+}
 }
 
 // Helper function to show error

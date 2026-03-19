@@ -28,7 +28,7 @@ const outputFormat = document.getElementById('outputFormat').value;
 
 // Validation
 if (!videoUrl) {
-showError('Lütfen bir YouTube video URL'si girin.');
+showError("Lütfen bir YouTube video URL'si girin.");
 return;
 }
 
@@ -39,7 +39,7 @@ return;
 
 // Validate YouTube URL
 if (!isValidYouTubeUrl(videoUrl)) {
-showError('Geçerli bir YouTube URL'si girin. Örnek: https://www.youtube.com/watch?v=xxxxx');
+showError("Geçerli bir YouTube URL'si girin. Örnek: https://www.youtube.com/watch?v=xxxxx");
 return;
 }
 

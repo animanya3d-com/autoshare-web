@@ -52,7 +52,7 @@ if (DEMO_MODE) {
 setTimeout(() => {
 loading.style.display = 'none';
 submitBtn.disabled = false;
-showResult(Demo Sonuç:\n\nVideo URL: ${videoUrl}\nFormat: ${outputFormat}\n\nBu bir demo yanıtıdır. Gerçek API entegrasyonu için DEMO_MODE'u false yapın.);
+showResult(`Demo Sonuç:\n\nVideo URL: ${videoUrl}\nFormat: ${outputFormat}\n\nBu bir demo yanıtıdır. Gerçek API entegrasyonu için DEMO_MODE'u false yapın.`);
 }, 2000);
 } else {
 // Real API call
@@ -73,7 +73,7 @@ submitBtn.disabled = false;
 
 if (!response.ok) {
 const errorText = await response.text();
-throw new Error(API Hatası (${response.status}): ${errorText});
+throw new Error(`API Hatası (${response.status}): ${errorText}`);
 }
 
 const data = await response.json();
@@ -90,7 +90,7 @@ showResult(JSON.stringify(data, null, 2));
 } catch (error) {
 loading.style.display = 'none';
 submitBtn.disabled = false;
-showError(Hata: ${error.message});
+showError(`Hata: ${error.message}`);
 console.error('API Error:', error);
 }
 }
